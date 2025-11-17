@@ -12,6 +12,8 @@ export default async function handler(request, response) {
     return response.status(200).json(rows);
   } catch (error) {
     console.error('Database Error:', error);
-    return response.status(500).json({ error: 'Failed to fetch vocabulary from the database.' });
+    // Para depuração, retornamos uma mensagem de erro mais específica.
+    const errorMessage = error instanceof Error ? error.message : 'An unknown database error occurred.';
+    return response.status(500).json({ error: `Failed to fetch vocabulary from the database: ${errorMessage}` });
   }
 }
