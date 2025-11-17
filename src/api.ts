@@ -24,13 +24,22 @@ export const fetchVocabularyFromAPI = async (): Promise<VocabularyWord[]> => {
     return new Promise(resolve => setTimeout(() => resolve(vocabularyWithIds), 500));
   }
 
-  // A lógica de produção permanece inalterada.
+  // A lógica de produção foi melhorada para fornecer mais detalhes em caso de erro.
   try {
     const response = await fetch(API_URL);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'An unknown server error occurred.' }));
-      throw new Error(errorData.error || `Server responded with status: ${response.status}`);
+      // Se a resposta não for OK, tentamos obter o máximo de detalhes possível.
+      const errorText = await response.text();
+      try {
+        // Primeiro, tentamos interpretar a resposta como JSON.
+        const errorData = JSON.parse(errorText);
+        throw new Error(errorData.error || `Server responded with status: ${response.status}`);
+      } catch (jsonError) {
+        // Se não for JSON, provavelmente é um erro de servidor (ex: uma página de erro da Vercel).
+        // Lançamos os primeiros 200 caracteres da resposta para ajudar na depuração.
+        throw new Error(`Server error (${response.status}): ${errorText.substring(0, 200)}...`);
+      }
     }
 
     const data: VocabularyWord[] = await response.json();
@@ -38,6 +47,7 @@ export const fetchVocabularyFromAPI = async (): Promise<VocabularyWord[]> => {
   } catch (error) {
     console.error("Failed to fetch vocabulary:", error);
     if (error instanceof Error) {
+        // O prefixo "Could not load vocabulary:" é adicionado para clareza na UI.
         throw new Error(`Could not load vocabulary: ${error.message}`);
     }
     throw new Error('An unexpected error occurred while trying to fetch data.');
