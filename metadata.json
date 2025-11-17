@@ -1,0 +1,5 @@
+{
+  "name": "HSK1_POSTGRESQL_SB",
+  "description": "Uma aplicação web interativa para navegar, pesquisar e estudar a lista de vocabulário do HSK Nível 1, conectada a um banco de dados PostgreSQL no Supabase e implantada na Vercel.",
+  "requestFramePermissions": []
+}
